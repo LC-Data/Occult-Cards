@@ -1,8 +1,8 @@
 
-cards = [ ['The Temple', 'high', 10000, 1, function(card, player) {player.field.push(player.hand[card]);console.log(player.field);}], ["Eulogist's Pulpit", 'high', 10000, 1, function(card, player) {player.field.push(player.hand[card]);console.log(player.field);}], ["Aanjalie's Athame", 'special', 15000, 2, function(card, player) {player.field.push(player.hand[card]);console.log(player.field);}],
+cards = [ ['The Temple', 'high', 10000, 1, function(card, player) {player.field.push(player.hand[card]);console.log(player.field);player.hand.splice(cardInd,1);console.log(`Should have just split at ${cardInd}`);}], ["Eulogist's Pulpit", 'high', 10000, 1, function(card, player) {player.field.push(player.hand[card]);console.log(player.field);}], ["Aanjalie's Athame", 'special', 15000, 2, function(card, player) {player.field.push(player.hand[card]);player.hand.splice(cardInd,1);console.log(`Should have just split at ${cardInd}`);}],
 ["Nathan's Katar", 'special', 15000, 2, function(card, player) {player.field.push(player.hand[card]);console.log(player.field);}], ["Eastern Farmer's Field", 'middle', 5000, 3, function(card, player) {player.field.push(player.hand[card]);console.log(player.field);}], ["Western Farmer's Field", 'middle', 5000, 3, function(card, player) {player.field.push(player.hand[card]);console.log(player.field);}], ['Railroad #1', 'middle', 5000, 4, function(card, player) {player.field.push(player.hand[card]);console.log(player.field);}],
 ['Railroad #2', 'middle', 5000, 4, function(card, player) {player.field.push(player.hand[card]);console.log(player.field);}], ['Railroad #3', 'middle', 5000, 4, function(card, player) {player.field.push(player.hand[card]);console.log(player.field);}], ['Railroad #4', 'middle', 5000, 4, function(card, player) {player.field.push(player.hand[card]);console.log(player.field);}], ["Nomad's Camel", 'low', 2500, 5, function(card, player) {player.field.push(player.hand[card]);console.log(player.field);}], ["Nomad's Map", 'low', 2500, 5, function(card, player) {player.field.push(player.hand[card]);console.log(player.field);}],
-["Nomad's Poppy", 'low', 2500, 5, function(card, player) {player.field.push(player.hand[card]);console.log(player.field);}], ['Gold Coins', 'low', 1500, "none", function(card, player) {player.bank = player.bank + 1500;console.log(player)}], ['Gold Coins', 'low', 1500, "none", function(card, player) {player.bank = player.bank + 1500;console.log(player)}], ['Gold Coins', 'low', 1500, "none", function(card, player) {player.bank = player.bank + 1500;console.log(player)}], ['Gold Coins', 'low', 1500, "none", function(card, player) {player.bank = player.bank + 1500;console.log(player)}]];
+["Nomad's Poppy", 'low', 2500, 5, function(card, player) {player.field.push(player.hand[card]);console.log(player.field);}], ['Gold Coins', 'low', 1500, "none", function(card, player) {player.bank = player.bank + 1500;player.hand.splice(cardInd,1);console.log(`Should have just split at ${cardInd}`);}], ['Gold Coins', 'low', 1500, "none", function(card, player) {player.bank = player.bank + 1500;console.log(player)}], ['Gold Coins', 'low', 1500, "none", function(card, player) {player.bank = player.bank + 1500;console.log(player)}], ['Gold Coins', 'low', 1500, "none", function(card, player) {player.bank = player.bank + 1500;console.log(player)}]];
 //The above array is all of the cards in the deck, cards get spliced out of this array and turned in to a Card object and then insterted in to an array called "hand" in a Player object
 
 discardPile = [];
@@ -65,15 +65,15 @@ function introDeal() {
 
 	for (i = 0; i <= players.length -1 ; i++) {
 		//console.log(`THIS IS PASS NUMBER `, i);
-		players[i] = new Player(players[i]);
+		players[i] = new Player(players[i]);					//creates a new player object with a variable shortcut to it
 		//console.log(players);
 	}
 
-	for (let value of players) {
-		dealHand(value);
+	for (let player of players) {		//For each player in the player list, deal a hand to the player object
+		dealHand(player);
 	}
 
-	gameController(players);
+	gameController(players);			//The intro round is over and the gameController function takes over
 }
 
 
@@ -82,20 +82,20 @@ function gameController(players) {
 	let winCondition = false; //someone has won the game
 	let currentPlayer = null;
 
-	function cardAction(card, player) {
+	function cardAction(cardInd, player) {
 		//console.log(`WE GOT INSIDE HERE!`);
-		currentPlayer.hand[card].action(card, player);	//execute the method for the card's action
+		currentPlayer.hand[cardInd].action(cardInd, player);	//execute the method for the card's action
 		console.log(currentPlayer.bank);
-		document.getElementById('game').innerHTML = "The card was played";
+		document.getElementById("demo").innerHTML = "Hello World";
 	}
 
 
 	function turn(player) {
 
-		let cardNames = [];
-
-		for (x = 0; x < 3; x++) { //for 3 'moves' in a turn play a card
-
+		dealCard(0,(cards.length), player);
+		let moves = 0;
+		while(moves < 3) { //for 3 'moves' in a turn play a card
+			let cardNames = [];
 
 			for (i=0; i < player.hand.length; i++){
 				console.log(player.hand[i].name);
@@ -107,12 +107,16 @@ function gameController(players) {
 			console.log(i, ` You have this many cards in your hand.`);
 			let pick = prompt("Which card would you like to play?");
 
-			if (cardNames.includes(pick)) {
+
+			if (pick == '' || !cardNames.includes(pick)){
+				console.log(`Sorry -- Please make a valid move.`)
+			} else if (cardNames.includes(pick)) {
 				console.log(`You played a card!`);
 				console.log(x);	//prints which turn this is
 				cardInd = cardNames.indexOf(pick);
 				console.log(`Card index is ${cardInd}`);
 				cardAction(cardInd, currentPlayer);
+				moves++;
 			} else {
 				console.log(`Sorry, couldn't find that card in your hand...`);
 				console.log(x);
@@ -122,15 +126,16 @@ function gameController(players) {
 
 
 
-
+	//THE GAME STARTS HERE
 
 	while (winCondition === false) {		//while noone has won the game
+		console.log(`The loop has started.`);
 		for (y = 0; y<players.length; y++) {
 			console.log(players[y]);
 
 			if (y == players.length) {		//Might just be able to refactor out this whole if statement... just while and for ?
 
-				console.log(`y was == players.length`);
+				console.log(`y was == players.length`);		//should just go back to the beginning of the while loop because the winCondition isn't met
 			} else if (y < players.length){
 				currentPlayer = players[y];
 				turn(players[y]);
@@ -151,6 +156,7 @@ function sleep(milliseconds) {
     }
   }
 }
+
 
 
 alert(`Open the console! Game auto-runs once you press 'OK'!`);
